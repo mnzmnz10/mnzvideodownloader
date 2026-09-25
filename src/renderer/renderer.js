@@ -52,7 +52,7 @@ function applySettings() {
   const b = settings.browser;
   $('#loginPanel').classList.toggle('hidden', b !== 'app');
   $('#filePanel').classList.toggle('hidden', b !== 'file');
-  $('#browserWarn').classList.toggle('hidden', !['chrome', 'edge', 'brave', 'opera', 'vivaldi'].includes(b));
+  if (b !== 'none') $('#advanced').open = true;
   $('#cookiesPath').textContent = settings.cookiesPath || 'Dosya seçilmedi';
   $('#cookiesPath').title = settings.cookiesPath || '';
   els.outDir.textContent = settings.outDir;
@@ -178,7 +178,11 @@ api.onJobUpdate(({ id, state, files, errors }) => {
   const job = jobs.get(id);
   if (!job) return;
   setState(job, state);
-  if (state === 'running') job.el.classList.add('indeterminate');
+  if (state === 'running') {
+    job.el.classList.add('indeterminate');
+    job.el.querySelector('.job-error').hidden = true; // yeniden denemede eski hatayı gizle
+    job.el.querySelector('.fill').style.width = '0';
+  }
   if (files?.length) {
     job.files = files;
     const btn = job.el.querySelector('.show');
@@ -229,6 +233,9 @@ api.onJobEvent((ev) => {
       break;
     case 'error':
       showErrors(job, [ev.message]);
+      break;
+    case 'log':
+      if (ev.message.startsWith('Çerezler okunamadı')) info.textContent = ev.message;
       break;
     default:
       break;

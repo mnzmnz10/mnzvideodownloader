@@ -117,13 +117,13 @@ function explainError(line) {
   const low = msg.toLowerCase();
   let hint = '';
   if (/could not copy .*cookie|failed to decrypt|app.?bound|cookie database|dpapi/.test(low)) {
-    hint =
-      'Chrome / Edge / Brave çerezleri Windows\'ta artık okunamıyor (tarayıcı şifrelemesi). ' +
-      '"Çerezler" kısmından "Uygulama içi giriş"i seçip "Giriş yap" ile siteye bir kez giriş yapın.';
+    hint = 'Tarayıcı çerezleri okunamadı. Uygulama çerezsiz olarak tekrar deniyor.';
   } else if (/unable to connect|timed out|getaddrinfo|name resolution|connection (refused|reset)|network is unreachable/.test(low)) {
     hint = 'Siteye bağlanılamadı. İnternet bağlantınızı ve bağlantı adresini kontrol edin.';
   } else if (/\blog ?in\b|sign in|\bcookies\b|\bprivate\b|\bage\b|age[- ]restricted/.test(low)) {
-    hint = 'Bu içerik giriş gerektiriyor. "Çerezler" kısmından "Uygulama içi giriş"i seçip "Giriş yap" ile siteye giriş yapın.';
+    hint =
+      'Bu içerik gizli ya da giriş istiyor. Herkese açık bir bağlantı deneyin; gerekirse ' +
+      '"Gelişmiş" bölümünden "Uygulama içi giriş" ile siteye bir kez giriş yapabilirsiniz.';
   } else if (low.includes('unsupported url')) {
     hint = 'Bu site veya bağlantı desteklenmiyor.';
   } else if (low.includes('video unavailable') || low.includes('not available')) {

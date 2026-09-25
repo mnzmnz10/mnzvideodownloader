@@ -38,13 +38,22 @@ const DEFAULT_SETTINGS = () => ({
   cookiesPath: '',
 });
 
+// Windows'ta çerezleri okunamayan tarayıcılar artık desteklenmiyor
+const SUPPORTED_COOKIE_SOURCES = ['none', 'app', 'file', 'firefox'];
+
 function loadSettings() {
+  let s;
   try {
-    return { ...DEFAULT_SETTINGS(), ...JSON.parse(fs.readFileSync(settingsFile(), 'utf8')) };
+    s = { ...DEFAULT_SETTINGS(), ...JSON.parse(fs.readFileSync(settingsFile(), 'utf8')) };
   } catch {
-    return DEFAULT_SETTINGS();
+    s = DEFAULT_SETTINGS();
   }
+  if (!SUPPORTED_COOKIE_SOURCES.includes(s.browser)) s.browser = 'none';
+  return s;
 }
+
+/** Çerezlerin okunamamasından kaynaklanan hatalar (çerezsiz tekrar denenir). */
+const COOKIE_FAILURE = /could not copy .*cookie|failed to decrypt|dpapi|app.?bound|cookie database|could not find .*cookies|cookies? .*(file|database).*(not found|invalid|error)|netscape format/i;
 
 function saveSettings(s) {
   try {
@@ -230,20 +239,17 @@ ipcMain.handle('download:start', async (_e, { jobs, options }) => {
   saveSettings(options);
   stopQueue = false;
 
-  // Çerez kaynağını hazırla
+  // Çerez kaynağını hazırla. Kullanılamıyorsa hata vermeden çerezsiz devam edilir.
   let cookiesFile = null;
   let tempCookies = null;
   if (options.browser === 'app') {
-    tempCookies = cookiesFile = await exportLoginCookies();
-    if (!cookiesFile) {
-      return { ok: false, message: 'Uygulama içi oturum boş. Önce "Giriş yap" ile siteye giriş yapın.' };
-    }
-  } else if (options.browser === 'file') {
-    if (!options.cookiesPath || !fs.existsSync(options.cookiesPath)) {
-      return { ok: false, message: 'cookies.txt dosyası seçilmedi ya da bulunamadı.' };
-    }
+    tempCookies = cookiesFile = await exportLoginCookies().catch(() => null);
+  } else if (options.browser === 'file' && options.cookiesPath && fs.existsSync(options.cookiesPath)) {
     cookiesFile = options.cookiesPath;
   }
+  const usesCookies =
+    Boolean(cookiesFile) || (options.browser && !['none', 'app', 'file'].includes(options.browser));
+  const baseOptions = usesCookies ? { ...options, cookiesFile } : { ...options, browser: 'none' };
 
   for (const job of jobs) {
     if (stopQueue) {
@@ -252,18 +258,14 @@ ipcMain.handle('download:start', async (_e, { jobs, options }) => {
     }
     send('job:update', { id: job.id, state: 'running' });
 
-    let dl;
-    try {
-      dl = runDownload(manager.binPath, { ...options, cookiesFile, url: job.url }, (ev) =>
-        send('job:event', { id: job.id, ...ev }),
-      );
-    } catch (err) {
-      send('job:update', { id: job.id, state: 'error', errors: [err.message] });
-      continue;
+    let r = await runJob(job, baseOptions);
+    if (r && usesCookies && !r.cancelled && r.code !== 0 && r.errors.some((e) => COOKIE_FAILURE.test(e))) {
+      // Çerezler okunamadı: kullanıcıyı uğraştırmadan çerezsiz tekrar dene
+      send('job:event', { id: job.id, type: 'log', message: 'Çerezler okunamadı, çerezsiz tekrar deneniyor...' });
+      send('job:update', { id: job.id, state: 'running' });
+      r = await runJob(job, { ...options, browser: 'none', cookiesFile: null });
     }
-    current = { id: job.id, cancel: dl.cancel };
-    const r = await dl.promise;
-    current = null;
+    if (!r) continue;
 
     let state = 'done';
     if (r.cancelled) state = 'cancelled';
@@ -274,6 +276,23 @@ ipcMain.handle('download:start', async (_e, { jobs, options }) => {
   if (tempCookies) fs.rm(tempCookies, { force: true }, () => {});
   return { ok: true };
 });
+
+/** Tek bir işi çalıştırır; başlatılamazsa hatayı bildirip null döner. */
+async function runJob(job, opts) {
+  let dl;
+  try {
+    dl = runDownload(manager.binPath, { ...opts, url: job.url }, (ev) =>
+      send('job:event', { id: job.id, ...ev }),
+    );
+  } catch (err) {
+    send('job:update', { id: job.id, state: 'error', errors: [err.message] });
+    return null;
+  }
+  current = { id: job.id, cancel: dl.cancel };
+  const r = await dl.promise;
+  current = null;
+  return r;
+}
 
 ipcMain.handle('download:cancel', () => {
   stopQueue = true;

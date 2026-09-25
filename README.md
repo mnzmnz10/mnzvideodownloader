@@ -13,8 +13,9 @@ dönüştürmeyi ffmpeg yapar.
 - Oynatma listesinin tamamını indirme
 - Kapak resmi ve başlık bilgilerini dosyaya ekleme
 - **Uyumlu mod:** varsa H.264 video seçer, Windows'un kendi oynatıcısında sorunsuz açılır
-- Giriş isteyen içerikler (Instagram vb.) için **uygulama içi giriş**: siteye bir kez giriş yaparsınız,
-  oturum hatırlanır; ayrıca `cookies.txt` dosyası veya Firefox çerezleri de kullanılabilir
+- Linki yapıştır, indir: giriş ya da çerez ayarı gerekmez. Yalnızca gizli / giriş isteyen içerikler için
+  isteğe bağlı **Gelişmiş** bölümünde uygulama içi giriş, `cookies.txt` ve Firefox çerezleri var;
+  çerezler okunamazsa uygulama kendiliğinden çerezsiz tekrar dener
 - ffmpeg uygulamayla birlikte gelir; yt-dlp ilk açılışta otomatik indirilir ve
   **her açılışta kendini günceller** (siteler değiştikçe indirme bozulmaz)
 - Açık / koyu tema (Windows temasına uyar), ayarlar hatırlanır
@@ -51,8 +52,8 @@ npm run dist       :: dist\ klasörüne kurulum + portable .exe üret
 ## Sık karşılaşılan sorunlar
 | Sorun | Çözüm |
 |---|---|
-| Instagram / gizli video "login required" | **Çerezler → Uygulama içi giriş**'i seçin, siteye tıklayıp açılan pencerede giriş yapın ve pencereyi kapatın. |
-| "Could not copy Chrome cookie database" / "Failed to decrypt with DPAPI" | Chrome, Edge ve Brave çerezlerini Windows'ta şifreledikleri için dışarıdan okunamıyor. **Uygulama içi giriş**'i kullanın. |
+| Instagram / gizli video "login required" | İçerik gizli ya da giriş istiyor. Herkese açık bağlantı deneyin; gerekirse **Gelişmiş → Uygulama içi giriş** ile bir kez giriş yapın. |
+| "Could not copy Chrome cookie database" | Chrome / Edge / Brave çerezleri Windows'ta okunamadığı için bu seçenekler kaldırıldı; uygulama artık çerezsiz indirir. |
 | YouTube girişi "tarayıcı güvenli değil" diyor | Google gömülü pencerelerde girişi engelleyebilir. YouTube'da çoğu video giriş gerektirmez; gerekirse **cookies.txt** seçeneğini kullanın. |
 | Video açılmıyor | "Uyumlu mod"u açık tutun. 4K gibi yalnızca VP9/AV1 sunulan videolar için [VLC](https://www.videolan.org/) kullanın. |
 | Sağ üstte kırmızı "İndirme motoru hazırlanamadı" | İnternet bağlantısını kontrol edip yazıya tıklayın (yeniden dener). |

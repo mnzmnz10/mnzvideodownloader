@@ -68,52 +68,48 @@
           </select>
         </div>
 
-        <div class="field">
-          <label class="label" for="browser">Çerezler <span class="muted">— giriş isteyen içerikler için</span></label>
-          <select id="browser">
-            <option value="none">Kullanma</option>
-            <option value="app">Uygulama içi giriş (önerilen)</option>
-            <option value="file">cookies.txt dosyası</option>
-            <option value="firefox">Firefox tarayıcısı</option>
-            <option value="chrome">Chrome tarayıcısı</option>
-            <option value="edge">Edge tarayıcısı</option>
-            <option value="brave">Brave tarayıcısı</option>
-            <option value="opera">Opera tarayıcısı</option>
-            <option value="vivaldi">Vivaldi tarayıcısı</option>
-          </select>
-        </div>
       </div>
-
-      <div id="loginPanel" class="subpanel hidden">
-        <div class="subpanel-row">
-          <span>Giriş yap:</span>
-          <button class="btn ghost site" data-site="instagram">Instagram</button>
-          <button class="btn ghost site" data-site="youtube">YouTube</button>
-          <button class="btn ghost site" data-site="x">X / Twitter</button>
-          <button class="btn ghost site" data-site="tiktok">TikTok</button>
-          <button class="btn ghost site" data-site="facebook">Facebook</button>
-          <button id="clearLogin" class="btn link">Oturumları kapat</button>
-        </div>
-        <p id="loginInfo" class="hint"></p>
-      </div>
-
-      <div id="filePanel" class="subpanel hidden">
-        <div class="folder">
-          <span id="cookiesPath" class="path"></span>
-          <button id="chooseCookies" class="btn ghost">Dosya seç</button>
-        </div>
-        <p class="hint">Tarayıcınıza “Get cookies.txt LOCALLY” gibi bir eklenti kurup siteye girişliyken dışa aktardığınız dosya.</p>
-      </div>
-
-      <p id="browserWarn" class="hint warn hidden">
-        ⚠ Chrome, Edge ve Brave çerezleri Windows'ta genellikle okunamıyor. “Uygulama içi giriş”i kullanmanız önerilir.
-      </p>
 
       <div class="toggles">
         <label class="toggle"><input type="checkbox" id="playlist"><span></span>Oynatma listesinin tamamını indir</label>
         <label class="toggle"><input type="checkbox" id="thumbnail"><span></span>Kapak resmini ekle</label>
         <label class="toggle" id="h264Field"><input type="checkbox" id="h264"><span></span>Uyumlu mod (varsa H.264 seç)</label>
       </div>
+
+      <details id="advanced" class="advanced">
+        <summary>Gelişmiş: gizli / giriş isteyen içerikler <span class="muted">(normalde gerekmez)</span></summary>
+        <div class="field adv-field">
+          <label class="label" for="browser">Çerez kaynağı</label>
+          <select id="browser">
+            <option value="none">Kullanma (varsayılan)</option>
+            <option value="app">Uygulama içi giriş</option>
+            <option value="file">cookies.txt dosyası</option>
+            <option value="firefox">Firefox tarayıcısı</option>
+          </select>
+        </div>
+
+        <div id="loginPanel" class="subpanel hidden">
+          <div class="subpanel-row">
+            <span>Giriş yap:</span>
+            <button class="btn ghost site" data-site="instagram">Instagram</button>
+            <button class="btn ghost site" data-site="youtube">YouTube</button>
+            <button class="btn ghost site" data-site="x">X / Twitter</button>
+            <button class="btn ghost site" data-site="tiktok">TikTok</button>
+            <button class="btn ghost site" data-site="facebook">Facebook</button>
+            <button id="clearLogin" class="btn link">Oturumları kapat</button>
+          </div>
+          <p id="loginInfo" class="hint"></p>
+        </div>
+
+        <div id="filePanel" class="subpanel hidden">
+          <div class="folder">
+            <span id="cookiesPath" class="path"></span>
+            <button id="chooseCookies" class="btn ghost">Dosya seç</button>
+          </div>
+          <p class="hint">Tarayıcınıza “Get cookies.txt LOCALLY” gibi bir eklenti kurup siteye girişliyken dışa aktardığınız dosya.</p>
+        </div>
+        <p class="hint">Çerezle indirme başarısız olursa uygulama otomatik olarak çerezsiz tekrar dener.</p>
+      </details>
 
       <div class="folder-row">
         <span class="label">Kayıt klasörü</span>

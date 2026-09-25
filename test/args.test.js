@@ -67,7 +67,7 @@ test('başlık, dosya ve hata satırları', () => {
   assert.deepStrictEqual(parseLine(`${TAG.file}C:\\a\\b.mp4`), { type: 'file', file: 'C:\\a\\b.mp4' });
   const e = parseLine('ERROR: [instagram] xyz: Requested content is not available, login required');
   assert.strictEqual(e.type, 'error');
-  assert.match(e.message, /Uygulama içi giriş/);
+  assert.match(e.message, /gizli ya da giriş istiyor/);
   assert.strictEqual(parseLine('   '), null);
 
   // "webpage" içindeki "age" giriş ipucunu tetiklememeli
@@ -76,8 +76,8 @@ test('başlık, dosya ve hata satırları', () => {
       'please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the template',
   );
   assert.match(net.message, /Siteye bağlanılamadı/);
-  assert.doesNotMatch(net.message, /please report|Uygulama içi giriş/);
-  assert.match(parseLine('ERROR: Sign in to confirm your age').message, /giriş gerektiriyor/);
+  assert.doesNotMatch(net.message, /please report|giriş istiyor/);
+  assert.match(parseLine('ERROR: Sign in to confirm your age').message, /giriş istiyor/);
 });
 
 test('uygulama içi oturum ve cookies.txt --cookies ile verilir', () => {
@@ -88,12 +88,12 @@ test('uygulama içi oturum ve cookies.txt --cookies ile verilir', () => {
   assert.strictEqual(valueOf(f, '--cookies'), 'D:\\c.txt');
 });
 
-test('Chrome çerez hatası uygulama içi girişi önerir', () => {
+test('Chrome çerez hatası çerezsiz yeniden denemeyi bildirir', () => {
   for (const line of [
     'ERROR: Could not copy Chrome cookie database. See  https://github.com/yt-dlp/yt-dlp/issues/7271  for more info',
     'ERROR: Failed to decrypt with DPAPI. See  https://github.com/yt-dlp/yt-dlp/issues/10927  for more info',
   ]) {
-    assert.match(parseLine(line).message, /Uygulama içi giriş/);
+    assert.match(parseLine(line).message, /çerezsiz olarak tekrar deniyor/);
   }
 });
 
