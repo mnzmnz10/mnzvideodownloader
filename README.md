@@ -1,1 +1,67 @@
-# Here are your Instructions
+# MNZ Video Downloader
+
+YouTube, Instagram, X (Twitter), TikTok, Facebook, Vimeo, Twitch, Reddit, SoundCloud gibi
+**yüzlerce siteden** **MP4 video** veya **MP3 ses** indiren Windows masaüstü uygulaması.
+Arayüz Electron ile yazıldı; indirme işini [yt-dlp](https://github.com/yt-dlp/yt-dlp),
+dönüştürmeyi ffmpeg yapar.
+
+## Özellikler
+- 🎬 MP4 video: En iyi / 4K / 1440p / 1080p / 720p / 480p / 360p
+- 🎵 MP3 ses: 320 / 256 / 192 / 128 kbps
+- Aynı anda birden fazla bağlantı (her satıra bir tane), sıralı indirme kuyruğu
+- İlerleme çubuğu, hız, kalan süre, iptal
+- Oynatma listesinin tamamını indirme
+- Kapak resmi ve başlık bilgilerini dosyaya ekleme
+- **Uyumlu mod:** varsa H.264 video seçer, Windows'un kendi oynatıcısında sorunsuz açılır
+- Instagram gibi giriş isteyen içerikler için tarayıcı çerezlerini kullanma
+- ffmpeg uygulamayla birlikte gelir; yt-dlp ilk açılışta otomatik indirilir ve
+  **her açılışta kendini günceller** (siteler değiştikçe indirme bozulmaz)
+- Açık / koyu tema (Windows temasına uyar), ayarlar hatırlanır
+
+## Hazır .exe'yi indirme
+Her gönderimde GitHub Actions Windows sürümünü otomatik derler:
+**Actions** sekmesi → son "Build Windows" çalışması → **Artifacts** →
+`mnzvideodownloader-windows`. İçinde iki dosya var:
+
+| Dosya | Açıklama |
+|---|---|
+| `mnzvideodownloader-1.0.0-setup.exe` | Kurulum programı (masaüstü kısayolu oluşturur) |
+| `mnzvideodownloader-1.0.0-portable.exe` | Kurulumsuz, tek dosya |
+
+`v1.0.0` gibi bir etiket gönderildiğinde bu dosyalar **Releases** sayfasına da eklenir.
+
+> Uygulama imzasız olduğu için ilk açılışta Windows SmartScreen uyarı verebilir:
+> **Ek bilgi → Yine de çalıştır**.
+
+## Kaynaktan çalıştırma / derleme
+[Node.js](https://nodejs.org/) (20 veya üstü) kurun, sonra:
+
+```bat
+npm install
+npm start          :: uygulamayı çalıştır
+npm test           :: testleri çalıştır
+npm run dist       :: dist\ klasörüne kurulum + portable .exe üret
+```
+
+## Sık karşılaşılan sorunlar
+| Sorun | Çözüm |
+|---|---|
+| Instagram / gizli video "login required" | **Tarayıcı çerezleri**'nden siteye giriş yaptığınız tarayıcıyı seçin. En sorunsuzu **Firefox**. Chrome/Edge seçiliyse indirirken tarayıcıyı kapatın. |
+| Video açılmıyor | "Uyumlu mod"u açık tutun. 4K gibi yalnızca VP9/AV1 sunulan videolar için [VLC](https://www.videolan.org/) kullanın. |
+| Sağ üstte kırmızı "İndirme motoru hazırlanamadı" | İnternet bağlantısını kontrol edip yazıya tıklayın (yeniden dener). |
+| Birden bire indirmeler hata veriyor | Uygulamayı yeniden başlatın; yt-dlp açılışta güncellenir. |
+
+## Proje yapısı
+```
+src/main.js            Electron ana süreç: pencere, ayarlar, indirme kuyruğu
+src/preload.js         Arayüze açılan güvenli köprü (contextIsolation)
+src/downloader.js      yt-dlp indirme/güncelleme, işlem başlatma ve iptal
+src/args.js            yt-dlp argümanları + çıktı çözümleme (testli)
+src/renderer/          Arayüz (HTML / CSS / JS)
+test/                  node:test birim testleri
+build/icon.png         Uygulama simgesi
+```
+
+## Not
+Yalnızca indirme hakkınız olan içerikleri indirin; sitelerin kullanım koşullarına ve
+telif haklarına uyun.

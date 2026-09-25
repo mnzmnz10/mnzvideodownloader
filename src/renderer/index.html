@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:">
+  <title>MNZ Video Downloader</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">MNZ</div>
+      <div>
+        <h1>Video Downloader</h1>
+        <p class="sub">YouTube • Instagram • X • TikTok • Facebook ve yüzlerce site</p>
+      </div>
+    </div>
+    <button id="engine" class="pill busy" title="İndirme motoru durumu">Hazırlanıyor...</button>
+  </header>
+
+  <main>
+    <section class="card">
+      <label class="label" for="urls">Bağlantılar <span class="muted">— her satıra bir adres</span></label>
+      <div class="url-row">
+        <textarea id="urls" rows="3" spellcheck="false"
+                  placeholder="https://www.youtube.com/watch?v=...&#10;https://www.instagram.com/reel/..."></textarea>
+        <div class="url-actions">
+          <button id="paste" class="btn ghost">Yapıştır</button>
+          <button id="clearUrls" class="btn ghost">Temizle</button>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="field">
+          <span class="label">Biçim</span>
+          <div class="segmented" role="radiogroup">
+            <button data-mode="mp4" class="seg" role="radio">🎬 MP4 Video</button>
+            <button data-mode="mp3" class="seg" role="radio">🎵 MP3 Ses</button>
+          </div>
+        </div>
+
+        <div class="field" id="qualityField">
+          <label class="label" for="quality">Video kalitesi</label>
+          <select id="quality">
+            <option value="best">En iyi</option>
+            <option value="2160">2160p (4K)</option>
+            <option value="1440">1440p</option>
+            <option value="1080">1080p</option>
+            <option value="720">720p</option>
+            <option value="480">480p</option>
+            <option value="360">360p</option>
+          </select>
+        </div>
+
+        <div class="field" id="bitrateField">
+          <label class="label" for="bitrate">Ses kalitesi</label>
+          <select id="bitrate">
+            <option value="320">320 kbps</option>
+            <option value="256">256 kbps</option>
+            <option value="192">192 kbps</option>
+            <option value="128">128 kbps</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="label" for="browser">Tarayıcı çerezleri</label>
+          <select id="browser" title="Instagram gibi giriş isteyen içerikler için, siteye giriş yaptığınız tarayıcıyı seçin">
+            <option value="none">Kullanma</option>
+            <option value="firefox">Firefox (önerilen)</option>
+            <option value="chrome">Chrome</option>
+            <option value="edge">Edge</option>
+            <option value="brave">Brave</option>
+            <option value="opera">Opera</option>
+            <option value="vivaldi">Vivaldi</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="toggles">
+        <label class="toggle"><input type="checkbox" id="playlist"><span></span>Oynatma listesinin tamamını indir</label>
+        <label class="toggle"><input type="checkbox" id="thumbnail"><span></span>Kapak resmini ekle</label>
+        <label class="toggle" id="h264Field"><input type="checkbox" id="h264"><span></span>Uyumlu mod (varsa H.264 seç)</label>
+      </div>
+
+      <div class="folder-row">
+        <span class="label">Kayıt klasörü</span>
+        <div class="folder">
+          <span id="outDir" class="path"></span>
+          <button id="chooseDir" class="btn ghost">Değiştir</button>
+          <button id="openDir" class="btn ghost">Aç</button>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="start" class="btn primary">⬇ İndir</button>
+        <button id="cancel" class="btn danger" disabled>İptal</button>
+      </div>
+    </section>
+
+    <section class="queue-head">
+      <h2>İndirmeler</h2>
+      <button id="clearDone" class="btn link">Bitenleri temizle</button>
+    </section>
+    <ul id="queue" class="queue">
+      <li class="empty">Henüz indirme yok. Bir bağlantı yapıştırıp “İndir”e basın.</li>
+    </ul>
+  </main>
+
+  <template id="jobTpl">
+    <li class="job">
+      <div class="job-top">
+        <span class="job-title"></span>
+        <span class="job-state"></span>
+      </div>
+      <div class="bar"><div class="fill"></div></div>
+      <div class="job-bottom">
+        <span class="job-info"></span>
+        <button class="btn link show" hidden>Klasörde göster</button>
+      </div>
+      <pre class="job-error" hidden></pre>
+    </li>
+  </template>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
