@@ -18,17 +18,18 @@ dönüştürmeyi ffmpeg yapar.
   **her açılışta kendini günceller** (siteler değiştikçe indirme bozulmaz)
 - Açık / koyu tema (Windows temasına uyar), ayarlar hatırlanır
 
-## Hazır .exe'yi indirme
-Her gönderimde GitHub Actions Windows sürümünü otomatik derler:
-**Actions** sekmesi → son "Build Windows" çalışması → **Artifacts** →
-`mnzvideodownloader-windows`. İçinde iki dosya var:
+## İndirme
+Sağ taraftaki **Releases** bölümünden (ya da depo adresinin sonuna `/releases` ekleyerek)
+son sürümü açın ve **Assets** altından birini indirin:
 
 | Dosya | Açıklama |
 |---|---|
 | `mnzvideodownloader-1.0.0-setup.exe` | Kurulum programı (masaüstü kısayolu oluşturur) |
 | `mnzvideodownloader-1.0.0-portable.exe` | Kurulumsuz, tek dosya |
 
-`v1.0.0` gibi bir etiket gönderildiğinde bu dosyalar **Releases** sayfasına da eklenir.
+`main` dalına her gönderimde GitHub Actions uygulamayı Windows'ta derler ve bu dosyaları
+Releases sayfasına otomatik koyar. Yeni bir sürüm numarası için `package.json` içindeki
+`version` değerini artırın.
 
 > Uygulama imzasız olduğu için ilk açılışta Windows SmartScreen uyarı verebilir:
 > **Ek bilgi → Yine de çalıştır**.

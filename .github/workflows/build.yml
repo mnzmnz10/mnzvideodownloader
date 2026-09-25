@@ -2,7 +2,7 @@ name: Build Windows
 
 on:
   push:
-    branches: ['**']
+    branches: [main]
     tags: ['v*']
   pull_request:
   workflow_dispatch:
@@ -37,8 +37,25 @@ jobs:
             dist/*.exe
           if-no-files-found: error
 
-      - name: Sürüm yayınla (v* etiketi)
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Sürüm numarasını oku
+        id: ver
+        shell: bash
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      # main'e her gönderimde .exe dosyaları Releases sayfasına konur
+      # (aynı sürüm numarasıyla tekrar gönderilirse mevcut sürümün dosyaları güncellenir)
+      - name: Releases sayfasına yayınla
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v${{ steps.ver.outputs.version }}
+          name: MNZ Video Downloader ${{ steps.ver.outputs.version }}
+          target_commitish: ${{ github.sha }}
+          make_latest: true
           files: dist/*.exe
+          body: |
+            ## İndir
+            - **mnzvideodownloader-${{ steps.ver.outputs.version }}-setup.exe** — Kurulum programı (masaüstü kısayolu oluşturur)
+            - **mnzvideodownloader-${{ steps.ver.outputs.version }}-portable.exe** — Kurulumsuz, tek dosya
+
+            Uygulama imzasız olduğu için Windows SmartScreen uyarı verebilir: **Ek bilgi → Yine de çalıştır**.
