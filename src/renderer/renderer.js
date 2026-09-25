@@ -292,9 +292,41 @@ els.cancel.addEventListener('click', () => {
   api.cancel();
 });
 
+// ------------------------------------------------------------ güncelleme
+function renderUpdate(st) {
+  const bar = $('#updateBar');
+  const btn = $('#updateBtn');
+  const text = $('#updateText');
+  if (!st || st.state === 'idle') {
+    bar.classList.add('hidden');
+    return;
+  }
+  bar.classList.remove('hidden');
+  btn.hidden = true;
+  if (st.state === 'downloading') {
+    text.textContent = `Yeni sürüm (${st.version}) indiriliyor... %${Math.round(st.percent || 0)}`;
+  } else if (st.state === 'ready') {
+    text.textContent = `✔ Yeni sürüm ${st.version} hazır. Uygulamayı kapattığınızda otomatik kurulur.`;
+    btn.textContent = 'Şimdi yeniden başlat';
+    btn.hidden = false;
+  } else if (st.state === 'available-portable') {
+    text.textContent = `Yeni sürüm ${st.version} var. Kurulumsuz sürüm kendini güncelleyemez; otomatik güncelleme için kurulum sürümünü kullanın.`;
+    btn.textContent = 'İndir';
+    btn.hidden = false;
+  }
+}
+
+api.onUpdateStatus(renderUpdate);
+$('#updateBtn').addEventListener('click', () => {
+  if (running && !confirm('Süren indirme iptal edilecek. Devam edilsin mi?')) return;
+  api.installUpdate();
+});
+
 // ------------------------------------------------------------ başlangıç
 (async () => {
   settings = await api.getSettings();
   applySettings();
   renderLogin(await api.loginStatus());
+  $('#version').textContent = `• v${await api.appVersion()}`;
+  renderUpdate(await api.updateStatus());
 })();

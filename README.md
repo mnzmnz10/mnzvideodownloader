@@ -19,18 +19,21 @@ dönüştürmeyi ffmpeg yapar.
   **her açılışta kendini günceller** (siteler değiştikçe indirme bozulmaz)
 - Açık / koyu tema (Windows temasına uyar), ayarlar hatırlanır
 
-## İndirme
-Sağ taraftaki **Releases** bölümünden (ya da depo adresinin sonuna `/releases` ekleyerek)
-son sürümü açın ve **Assets** altından birini indirin:
+## İndirme ve otomatik güncelleme
+Sağ taraftaki **Releases** bölümünden son sürümü açın ve **Assets** altından indirin:
 
 | Dosya | Açıklama |
 |---|---|
-| `mnzvideodownloader-1.1.0-setup.exe` | Kurulum programı (masaüstü kısayolu oluşturur) |
-| `mnzvideodownloader-1.1.0-portable.exe` | Kurulumsuz, tek dosya |
+| `mnzvideodownloader-<sürüm>-setup.exe` | **Önerilen.** Kurulum programı; **kendini otomatik günceller** |
+| `mnzvideodownloader-<sürüm>-portable.exe` | Kurulumsuz tek dosya; güncellemeleri yalnızca bildirir |
 
-`main` dalına her gönderimde GitHub Actions uygulamayı Windows'ta derler ve bu dosyaları
-Releases sayfasına otomatik koyar. Yeni bir sürüm numarası için `package.json` içindeki
-`version` değerini artırın.
+Kurulum sürümü açılışta ve 4 saatte bir yeni sürümü kontrol eder, arka planda indirir ve
+uygulama kapatılınca kurar (üstte çıkan **Şimdi yeniden başlat** ile hemen de kurulabilir).
+
+`main` dalına her gönderimde GitHub Actions uygulamayı Windows'ta derler, sürüm numarasını
+otomatik artırır (`1.2.<derleme no>`) ve Releases'a yayınlar; kurulu uygulamalar bunu
+güncelleme olarak alır. Büyük sürüm değişikliği için `package.json` içindeki `version`'ın
+ilk iki hanesini değiştirin.
 
 > Uygulama imzasız olduğu için ilk açılışta Windows SmartScreen uyarı verebilir:
 > **Ek bilgi → Yine de çalıştır**.
@@ -60,6 +63,7 @@ npm run dist       :: dist\ klasörüne kurulum + portable .exe üret
 src/main.js            Electron ana süreç: pencere, ayarlar, indirme kuyruğu
 src/preload.js         Arayüze açılan güvenli köprü (contextIsolation)
 src/downloader.js      yt-dlp indirme/güncelleme, işlem başlatma ve iptal
+src/updater.js         Uygulamanın GitHub Releases üzerinden otomatik güncellenmesi
 src/args.js            yt-dlp argümanları + çıktı çözümleme (testli)
 src/renderer/          Arayüz (HTML / CSS / JS)
 test/                  node:test birim testleri

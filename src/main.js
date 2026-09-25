@@ -5,6 +5,7 @@ const path = require('path');
 const { app, BrowserWindow, ipcMain, dialog, shell, net, session } = require('electron');
 const { YtDlpManager, runDownload, getFfmpegPath } = require('./downloader');
 const { toNetscapeCookies } = require('./args');
+const { setupUpdater } = require('./updater');
 
 // Uygulama içi giriş için kalıcı, ayrı bir tarayıcı oturumu
 const LOGIN_PARTITION = 'persist:mnz-login';
@@ -16,6 +17,7 @@ const LOGIN_SITES = {
   facebook: 'https://www.facebook.com/login',
 };
 let loginWin = null;
+let updater = null;
 
 let win = null;
 let manager = null;
@@ -189,6 +191,14 @@ ipcMain.handle('shell:openFolder', (_e, dir) => (dir && fs.existsSync(dir) ? she
 ipcMain.handle('shell:showFile', (_e, file) => file && fs.existsSync(file) && shell.showItemInFolder(file));
 ipcMain.handle('engine:retry', () => prepareEngine());
 
+ipcMain.handle('app:version', () => app.getVersion());
+ipcMain.handle('update:status', () => updater?.lastStatus?.() || null);
+ipcMain.handle('update:install', () => {
+  stopQueue = true;
+  if (current) current.cancel();
+  updater?.install();
+});
+
 ipcMain.handle('login:open', (_e, site) => openLogin(site));
 ipcMain.handle('login:status', () => loginStatus());
 ipcMain.handle('login:clear', async () => {
@@ -287,6 +297,7 @@ if (!app.requestSingleInstanceLock()) {
     if (!getFfmpegPath()) console.warn('ffmpeg bulunamadı');
     createWindow();
     win.webContents.once('did-finish-load', () => prepareEngine());
+    updater = setupUpdater((status) => send('update:status', status));
   });
 
   app.on('window-all-closed', () => {
