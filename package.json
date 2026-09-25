@@ -1,7 +1,7 @@
 {
   "name": "mnzvideodownloader",
   "productName": "MNZ Video Downloader",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "YouTube, Instagram, X (Twitter), TikTok ve yüzlerce siteden MP4 video / MP3 ses indirici",
   "main": "src/main.js",
   "author": "mnzmnz10",

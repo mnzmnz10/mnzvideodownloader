@@ -13,7 +13,8 @@ dönüştürmeyi ffmpeg yapar.
 - Oynatma listesinin tamamını indirme
 - Kapak resmi ve başlık bilgilerini dosyaya ekleme
 - **Uyumlu mod:** varsa H.264 video seçer, Windows'un kendi oynatıcısında sorunsuz açılır
-- Instagram gibi giriş isteyen içerikler için tarayıcı çerezlerini kullanma
+- Giriş isteyen içerikler (Instagram vb.) için **uygulama içi giriş**: siteye bir kez giriş yaparsınız,
+  oturum hatırlanır; ayrıca `cookies.txt` dosyası veya Firefox çerezleri de kullanılabilir
 - ffmpeg uygulamayla birlikte gelir; yt-dlp ilk açılışta otomatik indirilir ve
   **her açılışta kendini günceller** (siteler değiştikçe indirme bozulmaz)
 - Açık / koyu tema (Windows temasına uyar), ayarlar hatırlanır
@@ -24,8 +25,8 @@ son sürümü açın ve **Assets** altından birini indirin:
 
 | Dosya | Açıklama |
 |---|---|
-| `mnzvideodownloader-1.0.0-setup.exe` | Kurulum programı (masaüstü kısayolu oluşturur) |
-| `mnzvideodownloader-1.0.0-portable.exe` | Kurulumsuz, tek dosya |
+| `mnzvideodownloader-1.1.0-setup.exe` | Kurulum programı (masaüstü kısayolu oluşturur) |
+| `mnzvideodownloader-1.1.0-portable.exe` | Kurulumsuz, tek dosya |
 
 `main` dalına her gönderimde GitHub Actions uygulamayı Windows'ta derler ve bu dosyaları
 Releases sayfasına otomatik koyar. Yeni bir sürüm numarası için `package.json` içindeki
@@ -47,7 +48,9 @@ npm run dist       :: dist\ klasörüne kurulum + portable .exe üret
 ## Sık karşılaşılan sorunlar
 | Sorun | Çözüm |
 |---|---|
-| Instagram / gizli video "login required" | **Tarayıcı çerezleri**'nden siteye giriş yaptığınız tarayıcıyı seçin. En sorunsuzu **Firefox**. Chrome/Edge seçiliyse indirirken tarayıcıyı kapatın. |
+| Instagram / gizli video "login required" | **Çerezler → Uygulama içi giriş**'i seçin, siteye tıklayıp açılan pencerede giriş yapın ve pencereyi kapatın. |
+| "Could not copy Chrome cookie database" / "Failed to decrypt with DPAPI" | Chrome, Edge ve Brave çerezlerini Windows'ta şifreledikleri için dışarıdan okunamıyor. **Uygulama içi giriş**'i kullanın. |
+| YouTube girişi "tarayıcı güvenli değil" diyor | Google gömülü pencerelerde girişi engelleyebilir. YouTube'da çoğu video giriş gerektirmez; gerekirse **cookies.txt** seçeneğini kullanın. |
 | Video açılmıyor | "Uyumlu mod"u açık tutun. 4K gibi yalnızca VP9/AV1 sunulan videolar için [VLC](https://www.videolan.org/) kullanın. |
 | Sağ üstte kırmızı "İndirme motoru hazırlanamadı" | İnternet bağlantısını kontrol edip yazıya tıklayın (yeniden dener). |
 | Birden bire indirmeler hata veriyor | Uygulamayı yeniden başlatın; yt-dlp açılışta güncellenir. |

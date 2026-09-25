@@ -2,7 +2,7 @@
 
 const test = require('node:test');
 const assert = require('node:assert');
-const { buildArgs, parseLine, TAG } = require('../src/args');
+const { buildArgs, parseLine, toNetscapeCookies, TAG } = require('../src/args');
 
 const base = {
   url: 'https://www.youtube.com/watch?v=abc',
@@ -67,7 +67,7 @@ test('başlık, dosya ve hata satırları', () => {
   assert.deepStrictEqual(parseLine(`${TAG.file}C:\\a\\b.mp4`), { type: 'file', file: 'C:\\a\\b.mp4' });
   const e = parseLine('ERROR: [instagram] xyz: Requested content is not available, login required');
   assert.strictEqual(e.type, 'error');
-  assert.match(e.message, /Tarayıcı çerezleri/);
+  assert.match(e.message, /Uygulama içi giriş/);
   assert.strictEqual(parseLine('   '), null);
 
   // "webpage" içindeki "age" giriş ipucunu tetiklememeli
@@ -76,6 +76,35 @@ test('başlık, dosya ve hata satırları', () => {
       'please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the template',
   );
   assert.match(net.message, /Siteye bağlanılamadı/);
-  assert.doesNotMatch(net.message, /please report|Tarayıcı çerezleri/);
+  assert.doesNotMatch(net.message, /please report|Uygulama içi giriş/);
   assert.match(parseLine('ERROR: Sign in to confirm your age').message, /giriş gerektiriyor/);
+});
+
+test('uygulama içi oturum ve cookies.txt --cookies ile verilir', () => {
+  const a = buildArgs({ ...base, browser: 'app', cookiesFile: 'C:\\u\\session-cookies.txt' });
+  assert.strictEqual(valueOf(a, '--cookies'), 'C:\\u\\session-cookies.txt');
+  assert.ok(!a.includes('--cookies-from-browser'));
+  const f = buildArgs({ ...base, browser: 'file', cookiesFile: 'D:\\c.txt' });
+  assert.strictEqual(valueOf(f, '--cookies'), 'D:\\c.txt');
+});
+
+test('Chrome çerez hatası uygulama içi girişi önerir', () => {
+  for (const line of [
+    'ERROR: Could not copy Chrome cookie database. See  https://github.com/yt-dlp/yt-dlp/issues/7271  for more info',
+    'ERROR: Failed to decrypt with DPAPI. See  https://github.com/yt-dlp/yt-dlp/issues/10927  for more info',
+  ]) {
+    assert.match(parseLine(line).message, /Uygulama içi giriş/);
+  }
+});
+
+test('Netscape çerez dosyası biçimi', () => {
+  const txt = toNetscapeCookies([
+    { domain: '.instagram.com', hostOnly: false, path: '/', secure: true, httpOnly: true,
+      expirationDate: 1893456000.5, name: 'sessionid', value: 'abc' },
+    { domain: 'www.youtube.com', hostOnly: true, path: '/', secure: false, name: 'PREF', value: 'x\ty' },
+  ]);
+  const lines = txt.trim().split('\n');
+  assert.strictEqual(lines[0], '# Netscape HTTP Cookie File');
+  assert.strictEqual(lines[3], '#HttpOnly_.instagram.com\tTRUE\t/\tTRUE\t1893456000\tsessionid\tabc');
+  assert.strictEqual(lines[4], 'www.youtube.com\tFALSE\t/\tFALSE\t0\tPREF\txy');
 });

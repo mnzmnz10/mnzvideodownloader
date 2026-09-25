@@ -49,6 +49,12 @@ function applySettings() {
   els.playlist.checked = settings.playlist;
   els.thumbnail.checked = settings.thumbnail;
   els.h264.checked = settings.h264;
+  const b = settings.browser;
+  $('#loginPanel').classList.toggle('hidden', b !== 'app');
+  $('#filePanel').classList.toggle('hidden', b !== 'file');
+  $('#browserWarn').classList.toggle('hidden', !['chrome', 'edge', 'brave', 'opera', 'vivaldi'].includes(b));
+  $('#cookiesPath').textContent = settings.cookiesPath || 'Dosya seçilmedi';
+  $('#cookiesPath').title = settings.cookiesPath || '';
   els.outDir.textContent = settings.outDir;
   els.outDir.title = settings.outDir;
 }
@@ -74,6 +80,30 @@ $('#chooseDir').addEventListener('click', async () => {
   if (dir) update({ outDir: dir });
 });
 $('#openDir').addEventListener('click', () => api.openFolder(settings.outDir));
+
+// ------------------------------------------------------------ çerezler / giriş
+const SITE_NAMES = { instagram: 'Instagram', youtube: 'YouTube', x: 'X', tiktok: 'TikTok', facebook: 'Facebook' };
+
+function renderLogin({ sites }) {
+  document.querySelectorAll('.site').forEach((btn) =>
+    btn.classList.toggle('logged', sites.includes(btn.dataset.site)),
+  );
+  $('#loginInfo').textContent = sites.length
+    ? `Giriş yapılı: ${sites.map((s) => SITE_NAMES[s]).join(', ')}. İndirirken bu oturum kullanılır.`
+    : 'Bir siteye tıklayın, açılan pencerede giriş yapıp pencereyi kapatın. Oturum hatırlanır.';
+}
+
+document.querySelectorAll('.site').forEach((btn) =>
+  btn.addEventListener('click', () => api.openLogin(btn.dataset.site)),
+);
+$('#clearLogin').addEventListener('click', async () => {
+  if (confirm('Uygulama içindeki tüm site oturumları kapatılsın mı?')) renderLogin(await api.clearLogin());
+});
+api.onLoginStatus(renderLogin);
+$('#chooseCookies').addEventListener('click', async () => {
+  const file = await api.chooseCookiesFile();
+  if (file) update({ cookiesPath: file });
+});
 
 $('#paste').addEventListener('click', async () => {
   try {
@@ -266,4 +296,5 @@ els.cancel.addEventListener('click', () => {
 (async () => {
   settings = await api.getSettings();
   applySettings();
+  renderLogin(await api.loginStatus());
 })();

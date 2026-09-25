@@ -223,3 +223,19 @@ select { width: 100%; cursor: pointer; }
   overflow: auto;
   user-select: text;
 }
+
+.subpanel {
+  margin-top: 14px;
+  padding: 12px 14px;
+  background: var(--card-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.subpanel.hidden, .hint.hidden { display: none; }
+.subpanel .path { background: var(--card); }
+.subpanel-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.subpanel-row .btn { padding: 6px 12px; }
+.btn.site.logged { border-color: var(--ok); color: var(--ok); }
+.btn.site.logged::before { content: "✔ "; }
+.hint { margin: 8px 0 0; font-size: 12px; color: var(--muted); }
+.hint.warn { color: var(--warn); margin-top: 12px; }

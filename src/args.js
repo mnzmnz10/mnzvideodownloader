@@ -5,6 +5,8 @@ const path = require('path');
 const QUALITIES = ['best', '2160', '1440', '1080', '720', '480', '360'];
 const BITRATES = ['320', '256', '192', '128'];
 const BROWSERS = ['none', 'firefox', 'chrome', 'edge', 'brave', 'opera', 'vivaldi'];
+// Tarayıcı dışı çerez kaynakları: uygulama içi oturum ve cookies.txt dosyası
+const COOKIE_SOURCES = ['app', 'file'];
 
 // yt-dlp çıktısında bizim satırlarımızı ayırt etmek için önekler
 const TAG = {
@@ -24,7 +26,8 @@ const TAG = {
  * @param {boolean} o.playlist
  * @param {boolean} o.h264
  * @param {boolean} o.thumbnail
- * @param {string} o.browser    BROWSERS içinden
+ * @param {string} o.browser    BROWSERS veya COOKIE_SOURCES içinden
+ * @param {string} [o.cookiesFile] browser 'app' / 'file' iken kullanılacak Netscape çerez dosyası
  * @param {string} [o.ffmpegPath]
  */
 function buildArgs(o) {
@@ -51,7 +54,9 @@ function buildArgs(o) {
 
   if (o.ffmpegPath) args.push('--ffmpeg-location', o.ffmpegPath);
   args.push(...(o.playlist ? ['--yes-playlist', '--ignore-errors'] : ['--no-playlist']));
-  if (o.browser && o.browser !== 'none') {
+  if (COOKIE_SOURCES.includes(o.browser)) {
+    if (o.cookiesFile) args.push('--cookies', o.cookiesFile);
+  } else if (o.browser && o.browser !== 'none') {
     if (!BROWSERS.includes(o.browser)) throw new Error('Geçersiz tarayıcı');
     args.push('--cookies-from-browser', o.browser);
   }
@@ -111,12 +116,14 @@ function explainError(line) {
     .trim();
   const low = msg.toLowerCase();
   let hint = '';
-  if (low.includes('could not copy') && low.includes('cookie')) {
-    hint = 'Tarayıcı çerezleri okunamadı. Tarayıcıyı tamamen kapatıp tekrar deneyin ya da Firefox kullanın.';
+  if (/could not copy .*cookie|failed to decrypt|app.?bound|cookie database|dpapi/.test(low)) {
+    hint =
+      'Chrome / Edge / Brave çerezleri Windows\'ta artık okunamıyor (tarayıcı şifrelemesi). ' +
+      '"Çerezler" kısmından "Uygulama içi giriş"i seçip "Giriş yap" ile siteye bir kez giriş yapın.';
   } else if (/unable to connect|timed out|getaddrinfo|name resolution|connection (refused|reset)|network is unreachable/.test(low)) {
     hint = 'Siteye bağlanılamadı. İnternet bağlantınızı ve bağlantı adresini kontrol edin.';
   } else if (/\blog ?in\b|sign in|\bcookies\b|\bprivate\b|\bage\b|age[- ]restricted/.test(low)) {
-    hint = 'Bu içerik giriş gerektiriyor. "Tarayıcı çerezleri" kısmından siteye giriş yaptığınız tarayıcıyı seçin.';
+    hint = 'Bu içerik giriş gerektiriyor. "Çerezler" kısmından "Uygulama içi giriş"i seçip "Giriş yap" ile siteye giriş yapın.';
   } else if (low.includes('unsupported url')) {
     hint = 'Bu site veya bağlantı desteklenmiyor.';
   } else if (low.includes('video unavailable') || low.includes('not available')) {
@@ -127,4 +134,43 @@ function explainError(line) {
   return hint ? `${msg}\n→ ${hint}` : msg;
 }
 
-module.exports = { buildArgs, parseLine, explainError, QUALITIES, BITRATES, BROWSERS, TAG };
+/**
+ * Electron çerezlerini yt-dlp'nin okuduğu Netscape cookies.txt biçimine çevirir.
+ * @param {Array<{domain:string, hostOnly?:boolean, path?:string, secure?:boolean,
+ *   httpOnly?:boolean, expirationDate?:number, name:string, value:string}>} cookies
+ */
+function toNetscapeCookies(cookies) {
+  const lines = ['# Netscape HTTP Cookie File', '# MNZ Video Downloader tarafından oluşturuldu', ''];
+  for (const c of cookies) {
+    if (!c.domain || !c.name) continue;
+    let domain = c.domain;
+    const sub = !c.hostOnly;
+    if (sub && !domain.startsWith('.')) domain = `.${domain}`;
+    if (!sub) domain = domain.replace(/^\./, '');
+    const clean = (v) => String(v).replace(/[\t\r\n]/g, '');
+    lines.push(
+      [
+        (c.httpOnly ? '#HttpOnly_' : '') + domain,
+        sub ? 'TRUE' : 'FALSE',
+        c.path || '/',
+        c.secure ? 'TRUE' : 'FALSE',
+        c.expirationDate ? Math.floor(c.expirationDate) : 0,
+        clean(c.name),
+        clean(c.value),
+      ].join('\t'),
+    );
+  }
+  return lines.join('\n') + '\n';
+}
+
+module.exports = {
+  buildArgs,
+  parseLine,
+  explainError,
+  toNetscapeCookies,
+  QUALITIES,
+  BITRATES,
+  BROWSERS,
+  COOKIE_SOURCES,
+  TAG,
+};
